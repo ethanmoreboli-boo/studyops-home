@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StudyOps — Your Academic Command Centre</title>
+  <meta name="description" content="StudyOps is your personal academic command centre — track deadlines, study with purpose, and never miss a test again."/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══════════════════════════════════════════
+       TOKENS
+    ═══════════════════════════════════════════ */
+    :root {
+      --void:        #0d0f14;
+      --surface:     #13151c;
+      --surface-2:   #1a1d26;
+      --edge:        rgba(255,255,255,0.07);
+      --edge-2:      rgba(255,255,255,0.12);
+      --gold:        #f0b429;
+      --gold-dim:    #c8922a;
+      --gold-glow:   rgba(240,180,41,0.15);
+      --jade:        #00d4aa;
+      --jade-dim:    #00a882;
+      --jade-glow:   rgba(0,212,170,0.12);
+      --violet:      #8b5cf6;
+      --violet-glow: rgba(139,92,246,0.12);
+      --rose:        #f43f5e;
+      --sky:         #38bdf8;
+      --pink:        #f472b6;
+      --purple:      #c084fc;
+      --green:       #34d399;
+      --orange:      #fb923c;
+      --indigo:      #818cf8;
+      --t1:          #f0f2f7;
+      --t2:          #9ca3b8;
+      --t3:          #5c6280;
+      --ff-display:  'Playfair Display', Georgia, serif;
+      --ff-mono:     'DM Mono', 'Courier New', monospace;
+      --ff-body:     'Inter', system-ui, sans-serif;
+    }
+
+    /* ═══════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--void);
+      color: var(--t1);
+      font-family: var(--ff-body);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999;
+    }
+
+    a { text-decoration: none; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--void); }
+    ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 3px; }
+
+    /* ═══════════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════════ */
+    @keyframes blink     { 0%,100%{opacity:1} 50%{opacity:.2} }
+    @keyframes float-a   { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-10px) rotate(1deg)} }
+    @keyframes float-b   { 0%,100%{transform:translateY(0) rotate(1deg)} 50%{transform:translateY(-8px) rotate(-1deg)} }
+    @keyframes fillbar   { from{width:0} }
+    @keyframes reveal-up { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes spin-slow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    @keyframes ticker    { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    .blink   { animation: blink 2s ease-in-out infinite; }
+    .float-a { animation: float-a 5s ease-in-out infinite; }
+    .float-b { animation: float-b 6s ease-in-out infinite 1s; }
+    .fillbar { animation: fillbar 1.6s ease forwards; }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal[data-delay="100"] { transition-delay: 100ms; }
+    .reveal[data-delay="150"] { transition-delay: 150ms; }
+    .reveal[data-delay="200"] { transition-delay: 200ms; }
+    .reveal[data-delay="250"] { transition-delay: 250ms; }
+    .reveal[data-delay="300"] { transition-delay: 300ms; }
+    .reveal[data-delay="350"] { transition-delay: 350ms; }
+    .reveal[data-delay="400"] { transition-delay: 400ms; }
+
+    /* Gradient text */
+    .grad-gold {
+      background: linear-gradient(135deg, #f0b429 0%, #e8902a 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .grad-jade {
+      background: linear-gradient(135deg, #00d4aa 0%, #00a0ff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .grad-violet {
+      background: linear-gradient(135deg, #8b5cf6 0%, #c084fc 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    /* ═══════════════════════════════════════════
+       LAYOUT UTILITIES
+    ═══════════════════════════════════════════ */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+    @media(max-width:768px) { .container { padding: 0 20px; } }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border-radius: 100px;
+      font-family: var(--ff-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    }
+
+    /* ═══════════════════════════════════════════
+       NAV
+    ═══════════════════════════════════════════ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 18px 0;
+      transition: background .4s, border-color .4s, box-shadow .4s;
+    }
+    nav.scrolled {
+      background: rgba(13,15,20,.88);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--edge);
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1200px; margin: 0 auto; padding: 0 40px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 12px; }
+    .nav-logo-mark {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg,#f0b429,#e8902a);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--ff-mono); font-size: 14px; font-weight: 700; color: #000;
+    }
+    .nav-logo-text { font-family: var(--ff-display); font-size: 18px; font-weight: 700; color: var(--t1); }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a { font-size: 14px; font-weight: 500; color: var(--t3); transition: color .2s; }
+    .nav-links a:hover { color: var(--t1); }
+    .nav-cta {
+      padding: 10px 22px; border-radius: 10px;
+      background: linear-gradient(135deg,#f0b429,#e8902a);
+      color: #000 !important; font-size: 13px !important; font-weight: 600 !important;
+      box-shadow: 0 4px 16px var(--gold-glow);
+      transition: transform .2s, box-shadow .2s !important;
+    }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--gold-glow); }
+
+    .nav-mobile-btn {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer; padding: 6px;
+    }
+    .nav-mobile-btn span { display: block; width: 22px; height: 2px; background: var(--t2); border-radius: 2px; transition: all .3s; }
+    .nav-mobile-menu {
+      display: none; flex-direction: column; gap: 12px;
+      padding: 16px 40px 20px;
+      background: rgba(13,15,20,.97);
+      border-top: 1px solid var(--edge);
+    }
+    .nav-mobile-menu.open { display: flex; }
+    .nav-mobile-menu a { font-size: 14px; color: var(--t2); padding: 8px 0; }
+    .nav-mobile-cta {
+      background: linear-gradient(135deg,#f0b429,#e8902a) !important;
+      color: #000 !important; text-align: center;
+      padding: 12px !important; border-radius: 10px; font-weight: 600;
+    }
+
+    @media(max-width:768px) {
+      .nav-links { display: none; }
+      .nav-mobile-btn { display: flex; }
+    }
+
+    /* ═══════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════ */
+    .hero {
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center; gap: 60px;
+      padding: 120px 40px 80px;
+      max-width: 1200px; margin: 0 auto;
+      position: relative;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    }
+    .hero-bg-glow-1 {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 600px; border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(0,212,170,.08) 0%, rgba(139,92,246,.06) 50%, transparent 70%);
+      filter: blur(60px);
+    }
+    .hero-bg-glow-2 {
+      position: absolute; bottom: 0; left: 0;
+      width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(240,180,41,.06) 0%, transparent 70%);
+      filter: blur(60px);
+    }
+    .hero-bg-grid {
+      position: absolute; inset: 0; opacity: .025;
+      background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+      background-size: 80px 80px;
+    }
+
+    .hero-content { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 7px 16px; border-radius: 100px; margin-bottom: 28px;
+      font-family: var(--ff-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--jade); border: 1px solid rgba(0,212,170,.2); background: rgba(0,212,170,.06);
+    }
+    .hero-eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--jade); }
+
+    .hero-title {
+      font-family: var(--ff-display); font-weight: 900; line-height: 1.04;
+      letter-spacing: -2px; margin-bottom: 24px;
+      font-size: clamp(44px,5.5vw,76px);
+    }
+    .hero-title .line-plain { display: block; color: var(--t1); }
+
+    .hero-underline-wrap { position: relative; display: inline-block; }
+    .hero-underline-wrap svg { position: absolute; bottom: -4px; left: 0; width: 100%; pointer-events: none; }
+
+    .hero-sub {
+      font-size: 18px; color: var(--t2); line-height: 1.7;
+      max-width: 500px; margin-bottom: 40px; font-weight: 300;
+    }
+
+    .hero-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 32px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--jade), #00a0ff);
+      color: #000; font-size: 15px; font-weight: 600; letter-spacing: .3px;
+      transition: all .25s; border: none; cursor: pointer;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,212,170,.3); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 24px; border-radius: 12px;
+      border: 1px solid var(--edge-2); background: rgba(255,255,255,.03);
+      color: var(--t2); font-size: 14px; font-weight: 500;
+      transition: all .2s;
+    }
+    .btn-secondary:hover { color: var(--t1); border-color: rgba(255,255,255,.25); transform: translateY(-1px); }
+
+    .hero-trust {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .hero-trust-item {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--ff-mono); font-size: 11px; letter-spacing: 1px; color: var(--t3);
+    }
+
+    /* HERO VISUAL */
+    .hero-visual { position: relative; z-index: 1; }
+    .hero-visual-glow {
+      position: absolute; inset: -60px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,212,170,.12) 0%, rgba(139,92,246,.08) 50%, transparent 70%);
+      filter: blur(40px); pointer-events: none;
+    }
+
+    .app-card {
+      position: relative; border-radius: 20px; overflow: hidden;
+      background: linear-gradient(145deg, var(--surface-2), var(--surface));
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04);
+      transform: perspective(1200px) rotateY(-6deg) rotateX(3deg);
+      transition: transform .5s ease;
+    }
+    .app-card:hover { transform: perspective(1200px) rotateY(0deg) rotateX(0deg); }
+
+    .app-titlebar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 20px;
+      background: rgba(13,15,20,.8);
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .app-dots { display: flex; gap: 6px; }
+    .app-dots span { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-red  { background: #ff5f57; }
+    .dot-yel  { background: #febc2e; }
+    .dot-grn  { background: #28c840; }
+    .app-title-label {
+      flex: 1; text-align: center;
+      font-family: var(--ff-mono); font-size: 10px; letter-spacing: 3px; color: rgba(255,255,255,.22);
+    }
+    .app-live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--jade); }
+
+    .app-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+
+    .app-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+    .app-stat {
+      padding: 12px 10px; border-radius: 12px; text-align: center;
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06);
+    }
+    .app-stat-icon { font-size: 16px; margin-bottom: 4px; }
+    .app-stat-value { font-family: var(--ff-mono); font-size: 13px; font-weight: 500; }
+    .app-stat-label { font-family: var(--ff-mono); font-size: 8px; letter-spacing: 1.5px; color: rgba(255,255,255,.22); margin-top: 2px; }
+
+    .app-timer {
+      padding: 18px 20px; border-radius: 14px; text-align: center; position: relative; overflow: hidden;
+      background: rgba(0,212,170,.06); border: 1px solid rgba(0,212,170,.18);
+    }
+    .app-timer-label { font-family: var(--ff-mono); font-size: 9px; letter-spacing: 3px; color: var(--jade); margin-bottom: 8px; }
+    .app-timer-display { font-family: var(--ff-mono); font-size: 34px; font-weight: 500; letter-spacing: 6px; color: var(--jade); text-shadow: 0 0 20px rgba(0,212,170,.4); }
+    .app-timer-sub { font-family: var(--ff-mono); font-size: 9px; color: rgba(0,212,170,.5); margin-top: 6px; letter-spacing: 2px; }
+
+    .app-modules {
+      padding: 14px 16px; border-radius: 14px;
+      background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.05);
+    }
+    .app-modules-label { font-family: var(--ff-mono); font-size: 8px; letter-spacing: 2px; color: rgba(255,255,255,.22); margin-bottom: 12px; }
+    .app-module-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .app-module-row:last-child { margin-bottom: 0; }
+    .app-module-name { font-family: var(--ff-mono); font-size: 9px; color: rgba(255,255,255,.4); width: 76px; flex-shrink: 0; }
+    .app-module-track { flex: 1; height: 3px; background: rgba(255,255,255,.06); border-radius: 2px; overflow: hidden; }
+    .app-module-fill { height: 100%; border-radius: 2px; }
+    .app-module-hrs { font-family: var(--ff-mono); font-size: 9px; color: rgba(255,255,255,.22); width: 24px; text-align: right; }
+
+    .app-bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .app-mini {
+      padding: 12px 14px; border-radius: 12px;
+    }
+    .app-mini-label { font-family: var(--ff-mono); font-size: 8px; letter-spacing: 1.5px; margin-bottom: 6px; }
+    .app-mini-value { font-size: 12px; font-weight: 500; color: var(--t1); }
+    .app-mini-sub { font-family: var(--ff-mono); font-size: 9px; margin-top: 2px; }
+    .app-mood-row { display: flex; gap: 4px; margin-top: 4px; }
+    .app-mood-row span { font-size: 14px; opacity: .3; transition: opacity .2s; }
+    .app-mood-row span.active { opacity: 1; transform: scale(1.2); }
+
+    /* Float badges */
+    .badge-float {
+      position: absolute;
+      background: linear-gradient(135deg, var(--surface-2), var(--surface));
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px; padding: 12px 16px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.5);
+    }
+    .badge-float-1 { top: -24px; right: -24px; }
+    .badge-float-2 { bottom: -16px; left: -32px; }
+    .badge-float-label { font-family: var(--ff-mono); font-size: 8px; letter-spacing: 2px; color: var(--t3); margin-bottom: 4px; }
+    .badge-float-value { font-family: var(--ff-display); font-size: 24px; font-weight: 900; line-height: 1; }
+    .badge-float-sub { font-family: var(--ff-mono); font-size: 8px; margin-top: 3px; }
+
+    /* ═══════════════════════════════════════════
+       STATS BAR
+    ═══════════════════════════════════════════ */
+    .stats-bar {
+      border-top: 1px solid var(--edge);
+      border-bottom: 1px solid var(--edge);
+    }
+    .stats-bar-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 40px;
+      display: grid; grid-template-columns: repeat(4,1fr);
+    }
+    .stat-item {
+      padding: 40px 20px; text-align: center;
+      border-right: 1px solid var(--edge);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-icon { font-size: 24px; margin-bottom: 12px; }
+    .stat-num { font-family: var(--ff-display); font-weight: 900; line-height: 1; margin-bottom: 8px; font-size: clamp(36px,4vw,52px); }
+    .stat-desc { font-family: var(--ff-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--t3); }
+
+    @media(max-width:640px) {
+      .stats-bar-inner { grid-template-columns: 1fr 1fr; }
+      .stat-item:nth-child(2) { border-right: none; }
+    }
+
+    /* ═══════════════════════════════════════════
+       FEATURES
+    ═══════════════════════════════════════════ */
+    .features { background: var(--surface); padding: 100px 0; position: relative; }
+    .features::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,212,170,.05) 0%, transparent 50%);
+    }
+
+    .section-header { text-align: center; max-width: 680px; margin: 0 auto 72px; }
+    .section-eyebrow { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+    .section-title {
+      font-family: var(--ff-display); font-weight: 900; line-height: 1.06;
+      letter-spacing: -1.5px; margin-bottom: 20px;
+      font-size: clamp(34px,4.5vw,58px); color: var(--t1);
+    }
+    .section-sub { font-size: 17px; color: var(--t2); font-weight: 300; line-height: 1.7; }
+
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
+    }
+    @media(max-width:900px) { .features-grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width:600px) { .features-grid { grid-template-columns: 1fr; } }
+
+    .feature-card {
+      background: rgba(255,255,255,.025);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 20px; padding: 28px;
+      position: relative; overflow: hidden;
+      transition: all .3s cubic-bezier(.22,1,.36,1);
+    }
+    .feature-card::after {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      opacity: 0; transition: opacity .3s;
+    }
+    .feature-card:hover { transform: translateY(-4px); }
+    .feature-card:hover::after { opacity: 1; }
+
+    .feature-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
+    .feature-icon { font-size: 32px; }
+    .feature-tag {
+      font-family: var(--ff-mono); font-size: 9px; letter-spacing: 1.5px;
+      padding: 5px 10px; border-radius: 100px;
+    }
+    .feature-title { font-family: var(--ff-display); font-size: 20px; font-weight: 700; color: var(--t1); margin-bottom: 10px; }
+    .feature-desc { font-size: 13px; color: var(--t2); line-height: 1.7; font-weight: 300; }
+    .feature-preview { margin-top: 18px; }
+
+    /* Per-card accent colors */
+    .card-jade  { --ac: #00d4aa; --ag: rgba(0,212,170,.1); --ab: rgba(0,212,170,.2); }
+    .card-gold  { --ac: #f0b429; --ag: rgba(240,180,41,.1); --ab: rgba(240,180,41,.2); }
+    .card-pink  { --ac: #f472b6; --ag: rgba(244,114,182,.1); --ab: rgba(244,114,182,.2); }
+    .card-indigo{ --ac: #818cf8; --ag: rgba(129,140,248,.1); --ab: rgba(129,140,248,.2); }
+    .card-sky   { --ac: #38bdf8; --ag: rgba(56,189,248,.1); --ab: rgba(56,189,248,.2); }
+    .card-purple{ --ac: #c084fc; --ag: rgba(192,132,252,.1); --ab: rgba(192,132,252,.2); }
+    .card-green { --ac: #34d399; --ag: rgba(52,211,153,.1); --ab: rgba(52,211,153,.2); }
+    .card-orange{ --ac: #fb923c; --ag: rgba(251,146,60,.1); --ab: rgba(251,146,60,.2); }
+    .card-amber { --ac: #fbbf24; --ag: rgba(251,191,36,.1); --ab: rgba(251,191,36,.2); }
+
+    .feature-card:hover { background: var(--ag); border-color: var(--ab); box-shadow: 0 20px 60px var(--ag); }
+    .feature-card::after { background: linear-gradient(90deg, transparent, var(--ac), transparent); }
+    .feature-tag { background: var(--ag); color: var(--ac); border: 1px solid var(--ab); }
+
+    /* Preview elements */
+    .fp-timer-display { font-family: var(--ff-mono); font-size: 24px; text-align: center; margin: 8px 0 4px; }
+    .fp-bars { display: flex; gap: 3px; align-items: flex-end; height: 36px; }
+    .fp-bars span { flex: 1; border-radius: 3px 3px 0 0; }
+    .fp-mini-row { display: flex; align-items: center; gap: 8px; font-size: 11px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .fp-mini-row:last-child { border-bottom: none; }
+    .fp-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .fp-cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+    .fp-cal-cell { aspect-ratio: 1; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 8px; font-family: var(--ff-mono); }
+    .fp-track { height: 3px; background: rgba(255,255,255,.06); border-radius: 2px; overflow: hidden; }
+    .fp-fill { height: 100%; border-radius: 2px; }
+    .fp-timetable-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; margin-bottom: 4px; }
+    .fp-sync-line { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+    .fp-sync-node { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .fp-sync-dots { flex: 1; display: flex; justify-content: center; gap: 3px; }
+    .fp-sync-dots span { width: 4px; height: 2px; border-radius: 1px; }
+    .fp-mood-row { display: flex; gap: 6px; justify-content: space-between; align-items: flex-end; }
+    .fp-mood-col { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 16px; }
+    .fp-mood-day { font-family: var(--ff-mono); font-size: 8px; color: var(--t3); }
+    .fp-notif { font-family: var(--ff-mono); font-size: 10px; padding: 6px 10px; border-radius: 8px; margin-bottom: 6px; }
+    .fp-focus-box { border-radius: 10px; padding: 12px; text-align: center; }
+    .fp-focus-title { font-family: var(--ff-mono); font-size: 9px; letter-spacing: 2px; margin-top: 6px; }
+
+    /* ═══════════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════════ */
+    .how { padding: 100px 0; background: var(--void); position: relative; overflow: hidden; }
+    .how::before {
+      content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,92,246,.05) 0%, transparent 70%);
+      filter: blur(60px); pointer-events: none;
+    }
+    .how-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+    @media(max-width:900px) { .how-inner { grid-template-columns: 1fr; gap: 48px; } }
+
+    .step {
+      display: flex; gap: 16px; padding: 20px; border-radius: 16px;
+      border: 1px solid transparent; cursor: pointer;
+      transition: all .3s; margin-bottom: 8px;
+    }
+    .step:hover, .step.active {
+      background: rgba(255,255,255,.03);
+      border-color: rgba(255,255,255,.08);
+    }
+    .step-num {
+      width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--ff-display); font-size: 15px; font-weight: 900;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      color: var(--t3); transition: all .3s;
+    }
+    .step.active .step-num { color: var(--t1); }
+    .step-title { font-family: var(--ff-display); font-size: 18px; font-weight: 700; color: var(--t1); margin-bottom: 6px; }
+    .step-desc { font-size: 13px; color: var(--t3); line-height: 1.6; font-weight: 300; }
+
+    .how-panel {
+      border-radius: 20px; overflow: hidden;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 32px 80px rgba(0,0,0,.4);
+      position: sticky; top: 100px;
+    }
+    .how-panel-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 20px;
+      background: rgba(255,255,255,.02);
+      border-bottom: 1px solid var(--edge);
+    }
+    .how-panel-title { font-family: var(--ff-mono); font-size: 10px; letter-spacing: 2px; color: var(--t3); }
+    .how-panel-body { padding: 24px; }
+
+    /* ═══════════════════════════════════════════
+       QUOTE
+    ═══════════════════════════════════════════ */
+    .quote-section {
+      background: var(--surface);
+      padding: 100px 40px; text-align: center;
+      border-top: 1px solid var(--edge); border-bottom: 1px solid var(--edge);
+      position: relative; overflow: hidden;
+    }
+    .quote-section::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 50%, rgba(0,212,170,.04) 0%, transparent 60%);
+    }
+    .quote-mark { font-family: var(--ff-display); font-size: 100px; font-weight: 900; line-height: .5; display: block; margin-bottom: 36px; opacity: .25; }
+    .quote-text {
+      font-family: var(--ff-display); font-style: italic; font-weight: 700;
+      line-height: 1.5; color: var(--t1); max-width: 860px; margin: 0 auto 32px;
+      font-size: clamp(22px,3vw,38px);
+    }
+    .quote-attr {
+      display: inline-flex; align-items: center; gap: 12px;
+      font-family: var(--ff-mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    }
+    .quote-line { width: 40px; height: 1px; }
+
+    /* ═══════════════════════════════════════════
+       PRICING
+    ═══════════════════════════════════════════ */
+    .pricing { padding: 100px 0; background: var(--void); position: relative; overflow: hidden; }
+    .pricing::before {
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(240,180,41,.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 20px;
+      max-width: 960px; margin: 0 auto; align-items: start;
+    }
+    @media(max-width:768px) { .pricing-grid { grid-template-columns: 1fr; max-width: 400px; } }
+
+    .price-card {
+      border-radius: 20px; padding: 36px; position: relative;
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.07);
+      transition: all .3s;
+    }
+    .price-card:hover { border-color: rgba(255,255,255,.14); }
+    .price-card.featured {
+      background: linear-gradient(145deg, rgba(240,180,41,.12), rgba(240,180,41,.04));
+      border-color: rgba(240,180,41,.3);
+      box-shadow: 0 32px 80px rgba(240,180,41,.1);
+      transform: translateY(-8px);
+    }
+    .price-badge {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg,#f0b429,#e8902a);
+      color: #000; font-family: var(--ff-mono); font-size: 10px;
+      letter-spacing: 2px; padding: 5px 18px; border-radius: 100px; font-weight: 700;
+      white-space: nowrap;
+    }
+    .price-plan { font-family: var(--ff-mono); font-size: 10px; letter-spacing: 3px; color: var(--t3); margin-bottom: 16px; }
+    .price-card.featured .price-plan { color: var(--gold); }
+    .price-amount { font-family: var(--ff-display); font-size: 52px; font-weight: 900; line-height: 1; margin-bottom: 4px; color: var(--t1); }
+    .price-card.featured .price-amount { color: var(--gold); }
+    .price-period { font-size: 13px; color: var(--t3); font-weight: 300; margin-bottom: 8px; }
+    .price-tagline { font-family: var(--ff-mono); font-size: 10px; margin-bottom: 28px; }
+    .price-divider { height: 1px; background: rgba(255,255,255,.06); margin-bottom: 24px; }
+    .price-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .price-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--t2); font-weight: 300; }
+    .price-features li::before { content: '✓'; font-weight: 700; font-size: 11px; flex-shrink: 0; margin-top: 2px; }
+    .price-card.featured .price-features li::before { color: var(--gold); }
+    .price-features li::before { color: var(--jade); }
+    .price-btn {
+      display: block; text-align: center; padding: 14px; border-radius: 12px;
+      font-size: 14px; font-weight: 600; letter-spacing: .5px;
+      border: 1px solid rgba(255,255,255,.1); color: var(--t1);
+      background: rgba(255,255,255,.05);
+      transition: all .2s;
+    }
+    .price-btn:hover { background: rgba(255,255,255,.1); transform: translateY(-1px); }
+    .price-card.featured .price-btn {
+      background: linear-gradient(135deg,#f0b429,#e8902a);
+      border: none; color: #000;
+      box-shadow: 0 8px 24px rgba(240,180,41,.3);
+    }
+    .price-card.featured .price-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(240,180,41,.4); }
+    .price-note { text-align: center; margin-top: 40px; font-family: var(--ff-mono); font-size: 11px; letter-spacing: 1px; color: var(--t3); }
+
+    /* ═══════════════════════════════════════════
+       CTA
+    ═══════════════════════════════════════════ */
+    .cta-section {
+      background: var(--surface); padding: 120px 40px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 900px; height: 500px; border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(0,212,170,.1) 0%, rgba(139,92,246,.08) 50%, transparent 70%);
+      filter: blur(80px); pointer-events: none;
+    }
+    .cta-section::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .025;
+      background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .cta-inner { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; }
+    .cta-title { font-family: var(--ff-display); font-weight: 900; line-height: 1.04; letter-spacing: -2px; margin-bottom: 24px; color: var(--t1); font-size: clamp(44px,5.5vw,80px); }
+    .cta-sub { font-size: 18px; color: var(--t2); margin-bottom: 48px; font-weight: 300; max-width: 540px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+    .cta-actions { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 32px; }
+    .cta-trust { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; }
+    .cta-trust-item { font-family: var(--ff-mono); font-size: 11px; color: var(--t3); letter-spacing: 1px; }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    footer {
+      background: var(--void); border-top: 1px solid var(--edge);
+      padding: 60px 0 0;
+    }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 40px;
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px;
+      padding-bottom: 60px;
+    }
+    @media(max-width:768px) { .footer-inner { grid-template-columns: 1fr 1fr; gap: 36px; } }
+    @media(max-width:480px) { .footer-inner { grid-template-columns: 1fr; } }
+
+    .footer-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .footer-logo-mark {
+      width: 38px; height: 38px; border-radius: 12px;
+      background: linear-gradient(135deg,#f0b429,#e8902a);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--ff-mono); font-size: 16px; font-weight: 700; color: #000;
+    }
+    .footer-logo-text { font-family: var(--ff-display); font-size: 20px; font-weight: 700; color: var(--t1); }
+    .footer-desc { font-size: 14px; color: var(--t3); line-height: 1.7; font-weight: 300; max-width: 280px; margin-bottom: 24px; }
+    .footer-socials { display: flex; gap: 10px; }
+    .footer-social {
+      width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--edge);
+      transition: all .2s; cursor: pointer;
+    }
+    .footer-social:hover { background: rgba(255,255,255,.08); transform: translateY(-2px); }
+    .footer-col-title { font-family: var(--ff-mono); font-size: 10px; letter-spacing: 2px; color: var(--t3); text-transform: uppercase; margin-bottom: 20px; }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .footer-links a { font-size: 14px; color: rgba(255,255,255,.38); font-weight: 300; transition: color .2s; }
+    .footer-links a:hover { color: var(--gold); }
+    .footer-bottom {
+      border-top: 1px solid var(--edge); padding: 20px 40px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .footer-copy { font-family: var(--ff-mono); font-size: 10px; letter-spacing: 1.5px; color: var(--t3); }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE OVERRIDES
+    ═══════════════════════════════════════════ */
+    @media(max-width:1024px) {
+      .hero { grid-template-columns: 1fr; padding: 110px 32px 60px; }
+      .app-card { transform: none !important; }
+      .badge-float-1, .badge-float-2 { display: none; }
+    }
+    @media(max-width:768px) {
+      .hero { padding: 100px 20px 60px; gap: 40px; }
+      section, .stats-bar, .features, .how, .quote-section, .pricing, .cta-section { padding-left: 0; padding-right: 0; }
+      .container { padding: 0 20px; }
+      .how-inner { padding: 0 20px; }
+      .how-panel { display: none; }
+      .footer-inner { padding: 0 20px; }
+      .footer-bottom { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ NAV ══════════ -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-mark">S</div>
+      <span class="nav-logo-text">StudyOps</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#download" class="nav-cta">⬇ Download Free</a>
+    </div>
+    <button class="nav-mobile-btn" id="mobile-toggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="nav-mobile-menu" id="mobile-menu">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#download" class="nav-mobile-cta">⬇ Download Free</a>
+  </div>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<div style="max-width:1200px;margin:0 auto;padding:0 40px;position:relative;">
+  <div class="hero-bg">
+    <div class="hero-bg-glow-1"></div>
+    <div class="hero-bg-glow-2"></div>
+    <div class="hero-bg-grid"></div>
+  </div>
+  <div class="hero">
+    <!-- Left -->
+    <div class="hero-content">
+      <div class="hero-eyebrow reveal">
+        <span class="hero-eyebrow-dot blink"></span>
+        Windows App · Built for Students
+      </div>
+
+      <h1 class="hero-title reveal" data-delay="100">
+        <span class="line-plain">Master your</span>
+        <span class="grad-gold italic" style="display:block;">academics.</span>
+        <span class="line-plain" style="display:block;">Own your <span class="hero-underline-wrap grad-jade">future.
+          <svg viewBox="0 0 200 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 6 Q50 1 100 4 Q150 7 200 3" stroke="url(#gu)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <defs><linearGradient id="gu" x1="0" y1="0" x2="200" y2="0" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00d4aa"/><stop offset="1" stop-color="#00a0ff"/>
+            </linearGradient></defs>
+          </svg>
+        </span></span>
+      </h1>
+
+      <p class="hero-sub reveal" data-delay="200">
+        StudyOps is your all-in-one academic command centre — intelligent study planning, deadline tracking, deep focus tools, and real analytics that help you improve.
+      </p>
+
+      <div class="hero-actions reveal" data-delay="250">
+        <a href="#download" class="btn-primary">⬇ Download for Windows</a>
+        <a href="#features" class="btn-secondary">Explore features →</a>
+      </div>
+
+      <div class="hero-trust reveal" data-delay="300">
+        <div class="hero-trust-item">🪟 Windows 10 / 11</div>
+        <div class="hero-trust-item">⚡ Free to start</div>
+        <div class="hero-trust-item">🔒 No ads, ever</div>
+        <div class="hero-trust-item">📶 Works offline</div>
+      </div>
+    </div>
+
+    <!-- Right: App mockup -->
+    <div class="hero-visual reveal" data-delay="200">
+      <div class="hero-visual-glow"></div>
+      <div class="app-card">
+        <div class="app-titlebar">
+          <div class="app-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yel"></span>
+            <span class="dot-grn"></span>
+          </div>
+          <div class="app-title-label">STUDYOPS · DASHBOARD</div>
+          <div class="app-live-dot blink"></div>
+        </div>
+        <div class="app-body">
+          <div class="app-stat-grid">
+            <div class="app-stat">
+              <div class="app-stat-icon">⏱</div>
+              <div class="app-stat-value" style="color:var(--jade)">4h 20m</div>
+              <div class="app-stat-label">TODAY</div>
+            </div>
+            <div class="app-stat">
+              <div class="app-stat-icon">📈</div>
+              <div class="app-stat-value" style="color:var(--gold)">28h</div>
+              <div class="app-stat-label">WEEK</div>
+            </div>
+            <div class="app-stat">
+              <div class="app-stat-icon">📋</div>
+              <div class="app-stat-value" style="color:var(--rose)">3</div>
+              <div class="app-stat-label">TESTS</div>
+            </div>
+            <div class="app-stat">
+              <div class="app-stat-icon">🔥</div>
+              <div class="app-stat-value" style="color:#a78bfa">14d</div>
+              <div class="app-stat-label">STREAK</div>
+            </div>
+          </div>
+
+          <div class="app-timer">
+            <div class="app-timer-label">◎ ACTIVE SESSION · RUNNING</div>
+            <div class="app-timer-display" id="hero-timer">01:24:37</div>
+            <div class="app-timer-sub">Mathematics · Chapter 4 — Integration</div>
+          </div>
+
+          <div class="app-modules">
+            <div class="app-modules-label">THIS WEEK · MODULE HOURS</div>
+            <div class="app-module-row">
+              <span class="app-module-name">Mathematics</span>
+              <div class="app-module-track"><div class="app-module-fill fillbar" style="width:78%;background:var(--gold)"></div></div>
+              <span class="app-module-hrs">18h</span>
+            </div>
+            <div class="app-module-row">
+              <span class="app-module-name">Physics</span>
+              <div class="app-module-track"><div class="app-module-fill fillbar" style="width:52%;background:var(--jade)"></div></div>
+              <span class="app-module-hrs">12h</span>
+            </div>
+            <div class="app-module-row">
+              <span class="app-module-name">Chemistry</span>
+              <div class="app-module-track"><div class="app-module-fill fillbar" style="width:34%;background:var(--pink)"></div></div>
+              <span class="app-module-hrs">8h</span>
+            </div>
+            <div class="app-module-row">
+              <span class="app-module-name">History</span>
+              <div class="app-module-track"><div class="app-module-fill fillbar" style="width:20%;background:#818cf8"></div></div>
+              <span class="app-module-hrs">5h</span>
+            </div>
+          </div>
+
+          <div class="app-bottom-row">
+            <div class="app-mini" style="background:rgba(240,180,41,.06);border:1px solid rgba(240,180,41,.15)">
+              <div class="app-mini-label" style="color:var(--gold)">NEXT DEADLINE</div>
+              <div class="app-mini-value">Maths Test 2</div>
+              <div class="app-mini-sub" style="color:rgba(240,180,41,.6)">in 3 days ⚡</div>
+            </div>
+            <div class="app-mini" style="background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15)">
+              <div class="app-mini-label" style="color:#a78bfa">MOOD LOG</div>
+              <div class="app-mood-row">
+                <span>😤</span><span>😑</span><span>😊</span><span class="active">😎</span><span>🔥</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Floating badges -->
+      <div class="badge-float badge-float-1 float-a">
+        <div class="badge-float-label">FOCUS SCORE</div>
+        <div class="badge-float-value grad-jade">94%</div>
+        <div style="display:flex;gap:3px;margin-top:6px;">
+          <div style="height:3px;flex:1;border-radius:2px;background:var(--jade)"></div>
+          <div style="height:3px;flex:1;border-radius:2px;background:var(--jade)"></div>
+          <div style="height:3px;flex:1;border-radius:2px;background:var(--jade)"></div>
+          <div style="height:3px;flex:1;border-radius:2px;background:var(--jade)"></div>
+          <div style="height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,.1)"></div>
+        </div>
+      </div>
+      <div class="badge-float badge-float-2 float-b">
+        <div class="badge-float-label">STREAK</div>
+        <div class="badge-float-value grad-gold">14 🔥</div>
+        <div class="badge-float-sub" style="color:rgba(240,180,41,.6)">days in a row</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STATS BAR ══════════ -->
+<div class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="stat-item reveal">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-num grad-gold">12+</div>
+      <div class="stat-desc">Core Features</div>
+    </div>
+    <div class="stat-item reveal" data-delay="100">
+      <div class="stat-icon">📚</div>
+      <div class="stat-num grad-gold">∞</div>
+      <div class="stat-desc">Modules & Subjects</div>
+    </div>
+    <div class="stat-item reveal" data-delay="200">
+      <div class="stat-icon">📶</div>
+      <div class="stat-num grad-gold">100%</div>
+      <div class="stat-desc">Offline Capable</div>
+    </div>
+    <div class="stat-item reveal" data-delay="300">
+      <div class="stat-icon">🛡</div>
+      <div class="stat-num grad-gold">0</div>
+      <div class="stat-desc">Ads. Ever.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FEATURES ══════════ -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">
+        <span class="pill" style="background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.2);color:var(--gold)">Everything you need</span>
+      </div>
+      <h2 class="section-title">Built for the <em class="grad-gold">serious</em> student</h2>
+      <p class="section-sub">Every feature was designed around one question: what does a high-performing student actually need?</p>
+    </div>
+
+    <div class="features-grid">
+
+      <!-- 1. Timer -->
+      <div class="feature-card card-jade reveal">
+        <div class="feature-card-top">
+          <span class="feature-icon">⏱</span>
+          <span class="feature-tag">PRODUCTIVITY</span>
+        </div>
+        <div class="feature-title">Smart Study Timer</div>
+        <p class="feature-desc">Full session tracking with Pomodoro mode, countdown timer, and live subject logging. Every minute is recorded and analysed.</p>
+        <div class="feature-preview">
+          <div style="background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.12);border-radius:10px;padding:12px 14px;">
+            <div style="font-family:var(--ff-mono);font-size:9px;letter-spacing:2px;color:var(--jade);margin-bottom:6px;">◎ POMODORO · ROUND 2 OF 5</div>
+            <div class="fp-timer-display" style="color:var(--jade);text-shadow:0 0 12px rgba(0,212,170,.4);">25:00</div>
+            <div style="display:flex;gap:3px;margin-top:6px;">
+              <div class="fp-track" style="flex:1"><div class="fp-fill" style="width:40%;background:var(--jade)"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. AI Planner -->
+      <div class="feature-card card-gold reveal" data-delay="100">
+        <div class="feature-card-top">
+          <span class="feature-icon">🗺</span>
+          <span class="feature-tag">AI-POWERED</span>
+        </div>
+        <div class="feature-title">AI Study Planner</div>
+        <p class="feature-desc">Enter your deadlines and receive a phase-based daily plan for your schedule. Crunch mode activates 3 days before every test.</p>
+        <div class="feature-preview">
+          <div class="fp-mini-row">
+            <div class="fp-dot" style="background:var(--gold)"></div>
+            <span style="flex:1;font-size:11px;color:var(--t1);">Mathematics — Test 2</span>
+            <span style="font-family:var(--ff-mono);font-size:9px;background:rgba(240,180,41,.15);color:var(--gold);padding:2px 7px;border-radius:6px;">⚡ PRIORITY</span>
+          </div>
+          <div class="fp-mini-row">
+            <div class="fp-dot" style="background:var(--jade)"></div>
+            <span style="flex:1;font-size:11px;color:var(--t1);">Physics</span>
+            <span style="font-family:var(--ff-mono);font-size:9px;background:rgba(0,212,170,.1);color:var(--jade);padding:2px 7px;border-radius:6px;">◎ REVIEW</span>
+          </div>
+          <div class="fp-mini-row">
+            <div class="fp-dot" style="background:var(--pink)"></div>
+            <span style="flex:1;font-size:11px;color:var(--t2);">Chemistry Lab</span>
+            <span style="font-family:var(--ff-mono);font-size:9px;background:rgba(244,114,182,.1);color:var(--pink);padding:2px 7px;border-radius:6px;">→ PREP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Deadline Tracker -->
+      <div class="feature-card card-pink reveal" data-delay="200">
+        <div class="feature-card-top">
+          <span class="feature-icon">📅</span>
+          <span class="feature-tag">ORGANISATION</span>
+        </div>
+        <div class="feature-title">Deadline Command Centre</div>
+        <p class="feature-desc">Every test, assignment, and practical in one place. Urgency scoring and colour-coded indicators keep you ahead.</p>
+        <div class="feature-preview">
+          <div class="fp-cal">
+            <div class="fp-cal-cell" style="color:var(--t3)">M</div>
+            <div class="fp-cal-cell" style="color:var(--t3)">T</div>
+            <div class="fp-cal-cell" style="color:var(--t3)">W</div>
+            <div class="fp-cal-cell" style="color:var(--t3)">T</div>
+            <div class="fp-cal-cell" style="color:var(--t3)">F</div>
+            <div class="fp-cal-cell" style="color:var(--t3)">S</div>
+            <div class="fp-cal-cell" style="color:var(--t3)">S</div>
+            <div class="fp-cal-cell" style="background:rgba(255,255,255,.04);color:var(--t3)">1</div>
+            <div class="fp-cal-cell" style="background:rgba(255,255,255,.04);color:var(--t3)">2</div>
+            <div class="fp-cal-cell" style="background:rgba(255,255,255,.04);color:var(--t3)">3</div>
+            <div class="fp-cal-cell" style="background:rgba(255,255,255,.04);color:var(--t3)">4</div>
+            <div class="fp-cal-cell" style="background:rgba(244,114,182,.2);border:1px solid rgba(244,114,182,.4);color:var(--pink)">5</div>
+            <div class="fp-cal-cell" style="background:rgba(255,255,255,.04);color:var(--t3)">6</div>
+            <div class="fp-cal-cell" style="background:rgba(255,255,255,.04);color:var(--t3)">7</div>
+            <div class="fp-cal-cell" style="background:rgba(255,255,255,.04);color:var(--t3)">8</div>
+            <div class="fp-cal-cell" style="background:rgba(255,255,255,.04);color:var(--t3)">9</div>
+            <div class="fp-cal-cell" style="background:rgba(255,255,255,.04);color:var(--t3)">10</div>
+            <div class="fp-cal-cell" style="background:rgba(255,255,255,.04);color:var(--t3)">11</div>
+            <div class="fp-cal-cell" style="background:rgba(240,180,41,.2);border:1px solid rgba(240,180,41,.4);color:var(--gold)">12</div>
+            <div class="fp-cal-cell" style="background:rgba(255,255,255,.04);color:var(--t3)">13</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Analytics -->
+      <div class="feature-card card-indigo reveal">
+        <div class="feature-card-top">
+          <span class="feature-icon">📊</span>
+          <span class="feature-tag">ANALYTICS</span>
+        </div>
+        <div class="feature-title">Progress Analytics</div>
+        <p class="feature-desc">Weekly hour bars, module breakdowns, heatmap, mood trends, and streak history. Understand exactly how and when you work best.</p>
+        <div class="feature-preview">
+          <div class="fp-bars">
+            <span style="height:40%;background:rgba(129,140,248,.3)"></span>
+            <span style="height:65%;background:rgba(129,140,248,.3)"></span>
+            <span style="height:35%;background:rgba(129,140,248,.3)"></span>
+            <span style="height:90%;background:#818cf8"></span>
+            <span style="height:55%;background:rgba(129,140,248,.3)"></span>
+            <span style="height:100%;background:#818cf8"></span>
+            <span style="height:75%;background:rgba(129,140,248,.3)"></span>
+          </div>
+          <div style="font-family:var(--ff-mono);font-size:8px;color:var(--t3);margin-top:6px;letter-spacing:1px;">7-DAY STUDY HOURS · 43h TOTAL</div>
+        </div>
+      </div>
+
+      <!-- 5. Timetable -->
+      <div class="feature-card card-sky reveal" data-delay="100">
+        <div class="feature-card-top">
+          <span class="feature-icon">📆</span>
+          <span class="feature-tag">SCHEDULE</span>
+        </div>
+        <div class="feature-title">Live Timetable</div>
+        <p class="feature-desc">Your weekly lecture schedule at a glance. A live indicator shows your current class, with smart reminders before each one.</p>
+        <div class="feature-preview">
+          <div class="fp-timetable-row" style="background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.18)">
+            <span style="font-family:var(--ff-mono);font-size:8px;color:var(--t3)">10:00</span>
+            <span style="flex:1;font-size:11px;color:var(--sky)">Physics Lab</span>
+            <span class="blink" style="width:7px;height:7px;border-radius:50%;background:var(--sky);display:inline-block"></span>
+          </div>
+          <div class="fp-timetable-row" style="background:rgba(255,255,255,.02)">
+            <span style="font-family:var(--ff-mono);font-size:8px;color:var(--t3)">14:00</span>
+            <span style="flex:1;font-size:11px;color:var(--t2)">Chemistry</span>
+          </div>
+          <div class="fp-timetable-row" style="background:rgba(255,255,255,.02)">
+            <span style="font-family:var(--ff-mono);font-size:8px;color:var(--t3)">16:00</span>
+            <span style="flex:1;font-size:11px;color:var(--t2)">Mathematics Tut.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Focus Mode -->
+      <div class="feature-card card-purple reveal" data-delay="200">
+        <div class="feature-card-top">
+          <span class="feature-icon">🧠</span>
+          <span class="feature-tag">DISCIPLINE</span>
+        </div>
+        <div class="feature-title">Deep Focus Mode</div>
+        <p class="feature-desc">Block distractions before every session. A pre-study ritual — phone down, apps closed — that builds real discipline over time.</p>
+        <div class="feature-preview">
+          <div class="fp-focus-box" style="background:rgba(192,132,252,.06);border:1px solid rgba(192,132,252,.15)">
+            <div style="font-size:28px">🧠</div>
+            <div class="fp-focus-title" style="color:var(--purple)">DEEP FOCUS ACTIVE</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:4px;">All distractions blocked</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Cloud Sync -->
+      <div class="feature-card card-green reveal">
+        <div class="feature-card-top">
+          <span class="feature-icon">☁️</span>
+          <span class="feature-tag">SYNC</span>
+        </div>
+        <div class="feature-title">Cloud Sync</div>
+        <p class="feature-desc">Everything saved locally and synced to the cloud. Switch devices, wipe your PC — your full academic history is always safe.</p>
+        <div class="feature-preview">
+          <div class="fp-sync-line">
+            <div class="fp-sync-node" style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2)">💻</div>
+            <div class="fp-sync-dots">
+              <span style="background:var(--green)"></span>
+              <span style="background:var(--green)"></span>
+              <span style="background:var(--green)"></span>
+              <span style="background:rgba(255,255,255,.1)"></span>
+            </div>
+            <div class="fp-sync-node" style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2)">☁️</div>
+            <div class="fp-sync-dots">
+              <span style="background:var(--green)"></span>
+              <span style="background:var(--green)"></span>
+              <span style="background:var(--green)"></span>
+              <span style="background:rgba(255,255,255,.1)"></span>
+            </div>
+            <div class="fp-sync-node" style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2)">🖥</div>
+          </div>
+          <div style="font-family:var(--ff-mono);font-size:8px;color:var(--green);text-align:center;margin-top:8px;letter-spacing:1px;">ALL DEVICES IN SYNC · LAST SYNC 2m AGO</div>
+        </div>
+      </div>
+
+      <!-- 8. Mood -->
+      <div class="feature-card card-orange reveal" data-delay="100">
+        <div class="feature-card-top">
+          <span class="feature-icon">😊</span>
+          <span class="feature-tag">WELLBEING</span>
+        </div>
+        <div class="feature-title">Mood & Wellbeing</div>
+        <p class="feature-desc">Log your energy after each session. Over weeks, patterns emerge revealing which subjects drain you and which energise you.</p>
+        <div class="feature-preview">
+          <div class="fp-mood-row">
+            <div class="fp-mood-col"><span>😤</span><span class="fp-mood-day">Mon</span></div>
+            <div class="fp-mood-col"><span>😑</span><span class="fp-mood-day">Tue</span></div>
+            <div class="fp-mood-col"><span>😊</span><span class="fp-mood-day">Wed</span></div>
+            <div class="fp-mood-col"><span>😎</span><span class="fp-mood-day">Thu</span></div>
+            <div class="fp-mood-col"><span>🔥</span><span class="fp-mood-day">Fri</span></div>
+            <div class="fp-mood-col"><span>😊</span><span class="fp-mood-day">Sat</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. Reminders -->
+      <div class="feature-card card-amber reveal" data-delay="200">
+        <div class="feature-card-top">
+          <span class="feature-icon">🔔</span>
+          <span class="feature-tag">ALERTS</span>
+        </div>
+        <div class="feature-title">Smart Reminders</div>
+        <p class="feature-desc">Get notified before deadlines, when your streak is at risk, and when it's time to take a break. StudyOps keeps you accountable.</p>
+        <div class="feature-preview">
+          <div class="fp-notif" style="background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.15);color:var(--t2)">🔴 Physics test in 2 days</div>
+          <div class="fp-notif" style="background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.12);color:var(--t2)">🟡 Study streak at risk</div>
+          <div class="fp-notif" style="background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.12);color:var(--t2);margin-bottom:0">🟢 Break time — 25 min done</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ HOW IT WORKS ══════════ -->
+<section class="how" id="how">
+  <div class="how-inner">
+    <div>
+      <div class="reveal">
+        <span class="pill" style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);color:var(--violet);margin-bottom:20px;display:inline-flex;">Simple by design</span>
+      </div>
+      <h2 class="section-title reveal" data-delay="100" style="margin-bottom:40px;">Up and running<br>in <em class="grad-violet">minutes</em></h2>
+
+      <div id="steps-list">
+        <div class="step active reveal" data-delay="150" data-step="0" onclick="setStep(0)" style="--sc:#00d4aa">
+          <div class="step-num" style="border-color:rgba(0,212,170,.3);background:rgba(0,212,170,.08);color:var(--jade)">01</div>
+          <div>
+            <div class="step-title">📚 Add your modules</div>
+            <p class="step-desc">Name your subjects once. They populate every screen — timer, planner, tests, analytics. Setup takes under 2 minutes.</p>
+          </div>
+        </div>
+        <div class="step reveal" data-delay="200" data-step="1" onclick="setStep(1)">
+          <div class="step-num">02</div>
+          <div>
+            <div class="step-title">📅 Log your deadlines</div>
+            <p class="step-desc">Add tests, assignments, and practicals with dates. The calendar and study planner update instantly.</p>
+          </div>
+        </div>
+        <div class="step reveal" data-delay="250" data-step="2" onclick="setStep(2)">
+          <div class="step-num">03</div>
+          <div>
+            <div class="step-title">🗺 Generate your plan</div>
+            <p class="step-desc">One tap builds a phase-based study schedule from today to your final deadline — telling you exactly what to study each day.</p>
+          </div>
+        </div>
+        <div class="step reveal" data-delay="300" data-step="3" onclick="setStep(3)">
+          <div class="step-num">04</div>
+          <div>
+            <div class="step-title">📈 Study, track, improve</div>
+            <p class="step-desc">Start a session, focus, log your mood. Your streak grows, your stats sharpen, and you see exactly where your time goes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive panel -->
+    <div class="how-panel reveal" data-delay="200">
+      <div class="how-panel-bar">
+        <div class="app-dots"><span class="dot-red"></span><span class="dot-yel"></span><span class="dot-grn"></span></div>
+        <div class="how-panel-title" id="panel-title">STUDYOPS · ADD MODULES</div>
+      </div>
+      <div class="how-panel-body" id="panel-body">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ QUOTE ══════════ -->
+<div class="quote-section reveal">
+  <span class="quote-mark grad-gold">"</span>
+  <p class="quote-text">The students who succeed aren't necessarily the smartest — they're the most organised, the most consistent, and the most intentional about how they spend their time.</p>
+  <div class="quote-attr">
+    <div class="quote-line" style="background:var(--gold)"></div>
+    <span style="color:var(--gold)">Academic Philosophy · StudyOps</span>
+    <div class="quote-line" style="background:var(--gold)"></div>
+  </div>
+</div>
+
+<!-- ══════════ PRICING ══════════ -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">
+        <span class="pill" style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);color:var(--jade)">Simple pricing</span>
+      </div>
+      <h2 class="section-title">Invest in your <em class="grad-gold">education</em></h2>
+      <p class="section-sub">Start free. Upgrade when you're ready. No hidden fees, no surprise charges.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- Free -->
+      <div class="price-card reveal">
+        <div class="price-plan">FREE</div>
+        <div class="price-amount">R0</div>
+        <div class="price-period">Forever free</div>
+        <div class="price-tagline" style="color:var(--jade)">Get started today</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>Session timer & Pomodoro</li>
+          <li>Up to 3 modules</li>
+          <li>Tests & assignments tracker</li>
+          <li>Basic 7-day stats</li>
+          <li>Local storage only</li>
+        </ul>
+        <a href="#download" class="price-btn">Get started free</a>
+      </div>
+
+      <!-- Featured -->
+      <div class="price-card featured reveal" data-delay="150">
+        <div class="price-badge">MOST POPULAR</div>
+        <div class="price-plan">STUDENT PRO</div>
+        <div class="price-amount">R49</div>
+        <div class="price-period">per month · cancel anytime</div>
+        <div class="price-tagline" style="color:var(--gold)">Everything you need</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>Everything in Free</li>
+          <li>Unlimited modules & subjects</li>
+          <li>Cloud sync across devices</li>
+          <li>AI Study Plan generator</li>
+          <li>Advanced Pomodoro & timer</li>
+          <li>Full analytics & heatmaps</li>
+          <li>Weekly timetable</li>
+          <li>Smart reminders</li>
+          <li>Mood tracking history</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#download" class="price-btn">Start 14-day free trial</a>
+      </div>
+
+      <!-- Annual -->
+      <div class="price-card reveal" data-delay="300">
+        <div class="price-plan">ANNUAL</div>
+        <div class="price-amount">R399</div>
+        <div class="price-period">per year · save 32%</div>
+        <div class="price-tagline" style="color:#a78bfa">Best value</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>Everything in Student Pro</li>
+          <li>Single yearly payment</li>
+          <li>Early feature access</li>
+          <li>Extended data history (2 yrs)</li>
+          <li>Dedicated support</li>
+        </ul>
+        <a href="#download" class="price-btn">Get annual access</a>
+      </div>
+    </div>
+
+    <p class="price-note reveal">All plans include a 14-day free trial on Pro features · No credit card required</p>
+  </div>
+</section>
+
+<!-- ══════════ CTA ══════════ -->
+<section class="cta-section" id="download">
+  <div class="cta-inner">
+    <div class="reveal">
+      <span class="pill" style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);color:var(--jade);margin-bottom:24px;">
+        <span class="blink" style="width:7px;height:7px;border-radius:50%;background:var(--jade);display:inline-block"></span>
+        Ready to take control?
+      </span>
+    </div>
+    <h2 class="cta-title reveal" data-delay="100">Your best semester<br><em class="grad-jade">starts today.</em></h2>
+    <p class="cta-sub reveal" data-delay="200">Download StudyOps free. No account required. No ads, no bloat — just you and your goals.</p>
+    <div class="cta-actions reveal" data-delay="250">
+      <a href="#" class="btn-primary" style="font-size:16px;">⬇ Download for Windows <span style="font-family:var(--ff-mono);font-size:11px;opacity:.7;">FREE</span></a>
+      <a href="#features" class="btn-secondary">View all features →</a>
+    </div>
+    <div class="cta-trust reveal" data-delay="300">
+      <div class="cta-trust-item">🪟 Windows 10 / 11</div>
+      <div class="cta-trust-item">⚡ Free to start</div>
+      <div class="cta-trust-item">🔒 No ads, ever</div>
+      <div class="cta-trust-item">📶 Works offline</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo">
+        <div class="footer-logo-mark">S</div>
+        <span class="footer-logo-text">StudyOps</span>
+      </div>
+      <p class="footer-desc">Your personal academic command centre. Built for students who take their education seriously.</p>
+      <div class="footer-socials">
+        <div class="footer-social">🐦</div>
+        <div class="footer-social">💬</div>
+        <div class="footer-social">📧</div>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Product</div>
+      <ul class="footer-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#download">Download</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Support</div>
+      <ul class="footer-links">
+        <li><a href="#">Getting started</a></li>
+        <li><a href="#">FAQs</a></li>
+        <li><a href="#">Contact us</a></li>
+        <li><a href="#">Report a bug</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a href="#">Privacy policy</a></li>
+        <li><a href="#">Terms of use</a></li>
+        <li><a href="#">Refund policy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 STUDYOPS · ALL RIGHTS RESERVED</span>
+    <span class="footer-copy">BUILT FOR STUDENTS · SOUTH AFRICA</span>
+  </div>
+</footer>
+
+<script>
+/* ── Live hero timer ── */
+let heroSecs = 5077;
+setInterval(() => {
+  heroSecs++;
+  const h = String(Math.floor(heroSecs/3600)).padStart(2,'0');
+  const m = String(Math.floor((heroSecs%3600)/60)).padStart(2,'0');
+  const s = String(heroSecs%60).padStart(2,'0');
+  const el = document.getElementById('hero-timer');
+  if (el) el.textContent = `${h}:${m}:${s}`;
+}, 1000);
+
+/* ── Nav scroll ── */
+const nav = document.getElementById('main-nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 30);
+});
+
+/* ── Mobile menu ── */
+document.getElementById('mobile-toggle').addEventListener('click', () => {
+  document.getElementById('mobile-menu').classList.toggle('open');
+});
+
+/* ── Scroll reveal ── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.04, rootMargin: '0px 0px -10px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* ── How it works interactive panel ── */
+const panels = [
+  {
+    title: 'STUDYOPS · ADD MODULES',
+    html: `
+      <div style="space-y:8px">
+        ${[['Mathematics','#f0b429'],['Physics','#00d4aa'],['Chemistry','#f472b6'],['History','#818cf8']].map(([n,c])=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:8px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0"></div>
+            <span style="font-size:13px;color:var(--t1)">${n}</span>
+          </div>`).join('')}
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;border:1px dashed rgba(255,255,255,.1);margin-top:4px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0"></div>
+          <span style="font-size:13px;color:var(--t3)">+ Add module</span>
+        </div>
+      </div>`
+  },
+  {
+    title: 'STUDYOPS · DEADLINES',
+    html: `${[['Mathematics Test 2','in 3 days','#f43f5e'],['Physics Assignment','in 6 days','#f0b429'],['Chemistry Practical','in 10 days','#00d4aa']].map(([t,d,c])=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:8px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${c};flex-shrink:0"></div>
+        <span style="flex:1;font-size:13px;color:var(--t1)">${t}</span>
+        <span style="font-family:var(--ff-mono);font-size:9px;padding:3px 8px;border-radius:6px;background:${c}20;color:${c}">${d}</span>
+      </div>`).join('')}`
+  },
+  {
+    title: 'STUDYOPS · STUDY PLAN',
+    html: `${[['Today','Mathematics','4.5h','#f0b429','⚡ PRIORITY'],['Tomorrow','Physics','2h','#00d4aa','◎ REVIEW'],['Wed','Chemistry','1.5h','#f472b6','→ PREP']].map(([d,s,h,c,t])=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:8px;">
+        <span style="font-family:var(--ff-mono);font-size:9px;color:var(--t3);width:52px">${d}</span>
+        <div style="width:7px;height:7px;border-radius:50%;background:${c};flex-shrink:0"></div>
+        <span style="flex:1;font-size:12px;color:var(--t1)">${s}</span>
+        <span style="font-family:var(--ff-mono);font-size:9px;color:var(--t3)">${h}</span>
+        <span style="font-family:var(--ff-mono);font-size:8px;padding:2px 6px;border-radius:5px;background:${c}20;color:${c}">${t}</span>
+      </div>`).join('')}`
+  },
+  {
+    title: 'STUDYOPS · PROGRESS',
+    html: `
+      <div style="display:flex;justify-content:space-between;margin-bottom:24px;">
+        <div>
+          <div style="font-family:var(--ff-mono);font-size:9px;color:var(--t3);margin-bottom:4px;letter-spacing:1px">TODAY</div>
+          <div style="font-family:'Playfair Display';font-size:32px;font-weight:900;background:linear-gradient(135deg,#00d4aa,#00a0ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent">4h 20m</div>
+        </div>
+        <div>
+          <div style="font-family:var(--ff-mono);font-size:9px;color:var(--t3);margin-bottom:4px;letter-spacing:1px">STREAK</div>
+          <div style="font-family:'Playfair Display';font-size:32px;font-weight:900;background:linear-gradient(135deg,#f0b429,#e8902a);-webkit-background-clip:text;-webkit-text-fill-color:transparent">14 🔥</div>
+        </div>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,.06);margin-bottom:20px"></div>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:48px;margin-bottom:8px">
+        ${[4,6,3,8,5,9,7].map((v,i)=>`<div style="flex:1;border-radius:4px 4px 0 0;height:${(v/9)*100}%;background:${i===5?'#00d4aa':'rgba(0,212,170,.25)'}"></div>`).join('')}
+      </div>
+      <div style="font-family:var(--ff-mono);font-size:8px;color:var(--t3);letter-spacing:1px">7-DAY STUDY HOURS</div>`
+  }
+];
+
+let activeStep = 0;
+function setStep(idx) {
+  activeStep = idx;
+  document.querySelectorAll('.step').forEach((el,i) => el.classList.toggle('active', i===idx));
+  document.getElementById('panel-title').textContent = panels[idx].title;
+  document.getElementById('panel-body').innerHTML = panels[idx].html;
+
+  const colors = ['rgba(0,212,170,.3)','rgba(240,180,41,.3)','rgba(139,92,246,.3)','rgba(244,114,182,.3)'];
+  const nums = document.querySelectorAll('.step-num');
+  nums.forEach((n,i) => {
+    if (i === idx) {
+      const c = ['rgba(0,212,170,.08)','rgba(240,180,41,.08)','rgba(139,92,246,.08)','rgba(244,114,182,.08)'][idx];
+      const tc = ['var(--jade)','var(--gold)','var(--violet)','var(--pink)'][idx];
+      n.style.background = c; n.style.borderColor = colors[idx]; n.style.color = tc;
+    } else {
+      n.style.background = 'rgba(255,255,255,.04)';
+      n.style.borderColor = 'rgba(255,255,255,.08)';
+      n.style.color = 'var(--t3)';
+    }
+  });
+}
+setStep(0);
+</script>
+
+</body>
+</html>
