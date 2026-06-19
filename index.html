@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StudyOps — Command center for university students</title>
+<meta name="description" content="Track every deadline, every session, every module. One app, built for the chaos of university life."/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* ════════════════════════════════════════════════════════════════
+   STUDYOPS LANDING — Same design language as the app
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Identical to /static/css/style.css — no drift */
+  --bg:        #0a0a0c;
+  --bg-panel:  #101014;
+  --bg-input:  #18181f;
+  --bg-hover:  #1e1e28;
+  --border:    #2a2a38;
+  --border-hi: #3a3a50;
+
+  --text:      #e8e8f0;
+  --text-dim:  #7070a0;
+  --text-mute: #404058;
+
+  --accent:      #00e5ff;
+  --accent-dim:  #007a8c;
+  --accent-glow: rgba(0,229,255,0.12);
+
+  --green:     #00ff88;
+  --yellow:    #ffd740;
+  --red:       #ff4455;
+
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-body: 'Barlow', sans-serif;
+  --font-cond: 'Barlow Condensed', sans-serif;
+
+  --radius:    4px;
+  --radius-lg: 8px;
+
+  --max-w: 1180px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 32px; }
+
+/* ──────────────── NAV ──────────────── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  height: 56px;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  overflow: hidden;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-cond);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.brand-mark {
+  font-family: var(--font-mono);
+  font-size: 16px;
+}
+.nav-links {
+  display: flex;
+  gap: 4px;
+  margin-left: 24px;
+}
+.nav-links a {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 6px 12px;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.nav-time {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-mute);
+  letter-spacing: 1px;
+}
+.nav-cta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  padding: 8px 16px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  background: transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-cta:hover {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+.nav-mobile-menu {
+  display: none;
+}
+.mobile-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+/* ──────────────── HERO ──────────────── */
+.hero {
+  padding: 72px 0 48px;
+  position: relative;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.hero-title {
+  font-family: var(--font-cond);
+  font-weight: 800;
+  font-size: clamp(48px, 7vw, 88px);
+  line-height: 0.95;
+  letter-spacing: -0.5px;
+  margin-bottom: 24px;
+  color: var(--text);
+  text-transform: uppercase;
+}
+.hero-title .accent {
+  color: var(--accent);
+  display: block;
+}
+.hero-sub {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--text-dim);
+  max-width: 580px;
+  line-height: 1.6;
+  margin-bottom: 36px;
+}
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  padding: 14px 24px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  background: transparent;
+}
+.btn-primary {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.btn-primary:hover {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+.btn-ghost {
+  border-color: var(--border);
+  color: var(--text-dim);
+}
+.btn-ghost:hover {
+  border-color: var(--border-hi);
+  color: var(--text);
+}
+.hero-meta {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mute);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.hero-meta span { display: flex; align-items: center; gap: 6px; }
+.hero-meta .dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--text-mute);
+}
+
+/* ──────────────── HERO SCREENSHOT ──────────────── */
+.hero-shot {
+  margin: 16px 0 96px;
+  position: relative;
+}
+.shot-frame {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-panel);
+  box-shadow:
+    0 24px 80px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(0,229,255,0.08);
+}
+.shot-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+}
+.shot-dots { display: flex; gap: 6px; }
+.shot-dots span {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.shot-dot-r { background: #ff5f57; }
+.shot-dot-y { background: #febc2e; }
+.shot-dot-g { background: #28c840; }
+.shot-label {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-mute);
+}
+.shot-img { display: block; width: 100%; }
+
+/* ──────────────── SECTION COMMON ──────────────── */
+section {
+  padding: 80px 0;
+  border-top: 1px solid var(--border);
+}
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-num::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--text-mute);
+}
+.section-title {
+  font-family: var(--font-cond);
+  font-weight: 800;
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+.section-title em {
+  font-style: normal;
+  color: var(--accent);
+}
+.section-sub {
+  font-size: 17px;
+  color: var(--text-dim);
+  max-width: 640px;
+  line-height: 1.7;
+}
+
+/* ──────────────── PROBLEM SECTION ──────────────── */
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+  margin-top: 48px;
+}
+.problem-list {
+  list-style: none;
+  border-left: 1px solid var(--border);
+  padding-left: 0;
+}
+.problem-list li {
+  padding: 18px 0 18px 24px;
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+}
+.problem-list li:last-child { border-bottom: none; }
+.problem-list li::before {
+  content: attr(data-num);
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg);
+  color: var(--text-mute);
+  font-size: 10px;
+  padding: 0 6px;
+}
+.problem-resolution {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+}
+.problem-resolution-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.problem-resolution-text {
+  font-family: var(--font-cond);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.2;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: -0.3px;
+}
+
+/* ──────────────── CAPABILITIES ──────────────── */
+.capability {
+  margin-bottom: 96px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.capability:last-child { margin-bottom: 0; }
+.capability.reverse { direction: rtl; }
+.capability.reverse > * { direction: ltr; }
+
+.cap-text { padding: 0; }
+.cap-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.cap-title {
+  font-family: var(--font-cond);
+  font-weight: 800;
+  font-size: 36px;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: -0.3px;
+}
+.cap-desc {
+  font-size: 16px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.cap-points {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cap-points li {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+  letter-spacing: 0.5px;
+  padding-left: 16px;
+  position: relative;
+}
+.cap-points li::before {
+  content: '◈';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+.cap-shot {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-panel);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+}
+
+/* ──────────────── DOWNLOAD ──────────────── */
+.download-section {
+  text-align: center;
+  padding: 96px 0;
+}
+.download-section .section-num { justify-content: center; }
+.download-section .section-num::after {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--text-mute);
+}
+.download-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 32px 0 20px;
+}
+.download-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mute);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ──────────────── FOOTER ──────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  background: var(--bg-panel);
+}
+.footer-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mute);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* ──────────────── SETUP MODAL ──────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 620px;
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.modal-overlay.open .modal-box { transform: translateY(0); }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title {
+  font-family: var(--font-cond);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  text-transform: uppercase;
+}
+.modal-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 2px;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+.modal-close {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.15s;
+}
+.modal-close:hover {
+  border-color: var(--border-hi);
+  color: var(--text);
+}
+
+.modal-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.modal-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--text-mute);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.modal-tab:hover { color: var(--text-dim); }
+.modal-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.tab-intro {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.alert {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  border-left: 3px solid;
+}
+.alert strong { color: var(--text); font-weight: 600; }
+.alert-warn {
+  background: rgba(255, 215, 64, 0.06);
+  border-left-color: var(--yellow);
+}
+.alert-info {
+  background: rgba(0, 229, 255, 0.06);
+  border-left-color: var(--accent);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.step-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--accent-dim);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--accent-glow);
+}
+.step-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--text);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+.step-desc {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.65;
+}
+.step-desc code {
+  font-family: var(--font-mono);
+  background: var(--bg-input);
+  padding: 1px 8px;
+  border-radius: 3px;
+  color: var(--accent);
+  font-size: 12px;
+}
+.step-desc .hl { color: var(--accent); }
+
+.modal-footer-note {
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 1.5px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ──────────────── RESPONSIVE ──────────────── */
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-time { display: none; }
+  .mobile-toggle { display: flex; align-items: center; justify-content: center; }
+  .nav-mobile-menu.open {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 32px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-mobile-menu a {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    padding: 8px 0;
+    text-transform: uppercase;
+  }
+
+  .problem-grid { grid-template-columns: 1fr; gap: 32px; }
+  .capability,
+  .capability.reverse { grid-template-columns: 1fr; direction: ltr; gap: 24px; }
+}
+@media (max-width: 600px) {
+  .container { padding: 0 16px; }
+  .nav-inner { padding: 0 16px; gap: 8px; }
+
+  /* Scale nav elements */
+  .brand { font-size: 16px; letter-spacing: 2px; gap: 6px; }
+  .brand-mark { font-size: 13px; }
+  .nav-cta { font-size: 10px; padding: 6px 12px; letter-spacing: 1px; }
+  .mobile-toggle { width: 32px; height: 32px; }
+  .mobile-toggle svg { width: 16px; height: 12px; }
+  .nav-mobile-menu.open { padding: 12px 16px; }
+
+  /* Scale hero */
+  .hero { padding: 40px 0 24px; }
+  .hero-sub { font-size: 15px; }
+  .hero-shot { margin-bottom: 48px; }
+
+  /* Scale buttons globally */
+  .btn { font-size: 11px; padding: 12px 18px; letter-spacing: 1px; }
+
+  /* Scale hero meta */
+  .hero-meta { gap: 12px; font-size: 10px; letter-spacing: 1px; }
+
+  /* Scale sections */
+  section { padding: 48px 0; }
+  .download-section { padding: 56px 0; }
+  .section-title { margin-bottom: 12px; }
+  .section-sub { font-size: 15px; }
+  .cap-title { font-size: 28px; }
+  .cap-desc { font-size: 14px; }
+  .capability { margin-bottom: 48px; }
+
+  .footer-inner { padding: 0 16px; flex-direction: column; gap: 10px; text-align: center; font-size: 10px; }
+}
+@media (max-width: 400px) {
+  .brand { font-size: 14px; letter-spacing: 1px; }
+  .brand-mark { font-size: 11px; }
+  .nav-cta { font-size: 9px; padding: 5px 10px; }
+  .mobile-toggle { width: 28px; height: 28px; }
+  .mobile-toggle svg { width: 14px; height: 10px; }
+
+  .btn { font-size: 10px; padding: 10px 14px; }
+  .hero-meta { font-size: 9px; gap: 8px; }
+  .hero-eyebrow { font-size: 9px; letter-spacing: 2px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ──────────────── NAV ──────────────── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="brand">
+      <span class="brand-mark">◈</span>
+      <span>STUDYOPS</span>
+    </a>
+    <div class="nav-links">
+      <a href="#problem">Problem</a>
+      <a href="#features">Features</a>
+      <a href="#download">Download</a>
+    </div>
+    <div class="nav-right">
+      <span class="nav-time" id="nav-time">—</span>
+      <a href="#download" class="nav-cta">⬇ Download</a>
+      <button class="mobile-toggle" id="mobile-toggle" aria-label="Menu">
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="18" height="2" rx="1" fill="#7070a0"/>
+          <rect y="6" width="18" height="2" rx="1" fill="#7070a0"/>
+          <rect y="12" width="18" height="2" rx="1" fill="#7070a0"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div class="nav-mobile-menu" id="mobile-menu">
+    <a href="#problem">Problem</a>
+    <a href="#features">Features</a>
+    <a href="#download">Download</a>
+  </div>
+</nav>
+
+<!-- ──────────────── HERO ──────────────── -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Beta · Windows 10/11</div>
+    <h1 class="hero-title">
+      Command center
+      <span class="accent">for students.</span>
+    </h1>
+    <p class="hero-sub">
+      Track every deadline, every session, every module — in one place.
+      Built for the chaos of university, not the productivity dreams of an app blog.
+    </p>
+    <div class="hero-actions">
+      <a href="https://github.com/ethanmoreboli-boo/studyops-home/releases/download/v1.0.0/StudyOps-Setup-v1.0.0.exe" class="btn btn-primary">
+        ⬇ Download for Windows
+      </a>
+      <button class="btn btn-ghost" onclick="openSetup()">Setup guide →</button>
+    </div>
+    <div class="hero-meta">
+      <span><span class="dot"></span>v1.0.0</span>
+      <span><span class="dot"></span>Windows 10/11 · 64-bit</span>
+      <span><span class="dot"></span>Works offline</span>
+      <span><span class="dot"></span>Free during beta</span>
+    </div>
+  </div>
+</header>
+
+<!-- ──────────────── HERO SHOT — DASHBOARD ──────────────── -->
+<div class="container hero-shot">
+  <div class="shot-frame">
+    <div class="shot-titlebar">
+      <div class="shot-dots"><span class="shot-dot-r"></span><span class="shot-dot-y"></span><span class="shot-dot-g"></span></div>
+      <div class="shot-label">STUDYOPS · DASHBOARD</div>
+      <div style="width:48px;"></div>
+    </div>
+    <img class="shot-img" src="DASHBOARD.png" alt="StudyOps dashboard — daily greeting, study goal progress, six stat tiles, upcoming tests, and quick-start timer."/>
+  </div>
+</div>
+
+<!-- ──────────────── PROBLEM ──────────────── -->
+<section id="problem">
+  <div class="container">
+    <div class="section-num">01 — The Problem</div>
+    <h2 class="section-title">Your deadlines live<br><em>in six places.</em></h2>
+    <p class="section-sub">
+      You're not disorganised. The system is. Every lecturer announces deadlines differently.
+      Every module has its own portal. Every group project lives in its own WhatsApp thread.
+    </p>
+    <div class="problem-grid">
+      <ul class="problem-list">
+        <li data-num="01">WhatsApp group messages</li>
+        <li data-num="02">Lecturer announcements via email</li>
+        <li data-num="03">The LMS / Moodle portal</li>
+        <li data-num="04">Sticky notes &amp; whiteboards</li>
+        <li data-num="05">Your notes app</li>
+        <li data-num="06">Your own memory</li>
+      </ul>
+      <div class="problem-resolution">
+        <div class="problem-resolution-label">◈ The Resolution</div>
+        <div class="problem-resolution-text">
+          StudyOps puts them in one place — with a deadline countdown, urgency colour, and a study plan around them.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── CAPABILITIES ──────────────── -->
+<section id="features">
+  <div class="container">
+    <div class="section-num">02 — What it Does</div>
+    <h2 class="section-title">Built for <em>real</em> students.<br>Not productivity influencers.</h2>
+    <p class="section-sub" style="margin-bottom:80px;">
+      Every screen below is the actual app. No mockups, no marketing renders.
+      What you see is what you get when you download it.
+    </p>
+
+    <!-- DEADLINES -->
+    <div class="capability">
+      <div class="cap-text">
+        <div class="cap-label">◈ Coursework Tracker</div>
+        <h3 class="cap-title">Deadlines you can't ignore.</h3>
+        <p class="cap-desc">
+          Every test, every assignment, every practical — with countdown days
+          and urgency colours. Mark submitted. Watch the queue clear.
+        </p>
+        <ul class="cap-points">
+          <li>Three-column flow: pending → due today → submitted</li>
+          <li>Red urgency badge appears 2 days before deadline</li>
+          <li>Late submissions stay visible, not deleted</li>
+        </ul>
+      </div>
+      <div class="cap-shot">
+        <img src="ASSIGNMENTS.png" alt="Assignments page showing pending, submitted, and late counters with three-column kanban."/>
+      </div>
+    </div>
+
+    <!-- TIMETABLE -->
+    <div class="capability reverse">
+      <div class="cap-text">
+        <div class="cap-label">◈ Weekly Schedule</div>
+        <h3 class="cap-title">Your week, in one grid.</h3>
+        <p class="cap-desc">
+          Lectures, tutorials, labs, practicals — colour-coded per module.
+          Today's column is highlighted. No double-booking yourself.
+        </p>
+        <ul class="cap-points">
+          <li>7-day weekly view with hourly blocks</li>
+          <li>Per-module colour coding</li>
+          <li>Switch to calendar view for month-at-a-glance</li>
+        </ul>
+      </div>
+      <div class="cap-shot">
+        <img src="TIMETABLE.png" alt="Timetable weekly view with colour-coded class blocks across Monday to Sunday."/>
+      </div>
+    </div>
+
+    <!-- AI PLAN -->
+    <div class="capability">
+      <div class="cap-text">
+        <div class="cap-label">◈ AI Study Plan</div>
+        <h3 class="cap-title">Tells you what to study today.</h3>
+        <p class="cap-desc">
+          Set your deadlines. The planner builds a phase-based schedule from
+          today until your final exam — automatically. Crunch mode kicks in
+          three days before each deadline.
+        </p>
+        <ul class="cap-points">
+          <li>Auto-generates on every deadline change</li>
+          <li>CRUNCH priority &lt; 3 days · FOCUS priority &lt; 7 days</li>
+          <li>Adjusts hours-per-day based on your study days setting</li>
+        </ul>
+      </div>
+      <div class="cap-shot">
+        <img src="STUDY_PLAN_TOP.png" alt="Study plan with priority modules, crunch badges, and upcoming deadline list."/>
+      </div>
+    </div>
+
+    <!-- HEATMAP -->
+    <div class="capability reverse">
+      <div class="cap-text">
+        <div class="cap-label">◈ Progress Analytics</div>
+        <h3 class="cap-title">See when you study best.</h3>
+        <p class="cap-desc">
+          The 24-hour heatmap shows your real productive hours — not when
+          you think you study, when you actually do. Plan around your peak,
+          not someone else's morning routine.
+        </p>
+        <ul class="cap-points">
+          <li>Peak hour highlighted automatically</li>
+          <li>Total hours, weekly hours, best day, session count</li>
+          <li>Module breakdown with hours-per-subject</li>
+        </ul>
+      </div>
+      <div class="cap-shot">
+        <img src="PROGRESS_TOP.png" alt="24-hour study heatmap with peak hour highlighted in orange and session log below."/>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── DOWNLOAD ──────────────── -->
+<section class="download-section" id="download">
+  <div class="container">
+    <div class="section-num">03 — Download</div>
+    <h2 class="section-title">Take control.<br><em>Free during beta.</em></h2>
+    <p class="section-sub" style="margin: 0 auto;">
+      Windows 10/11. 64-bit. Installer is around 40MB.
+      Your data stays on your machine, synced to the cloud only when you're online.
+    </p>
+    <div class="download-actions">
+      <a href="https://github.com/ethanmoreboli-boo/studyops-home/releases/download/v1.0.0/StudyOps-Setup-v1.0.0.exe" class="btn btn-primary">
+        ⬇ Download for Windows
+      </a>
+      <button class="btn btn-ghost" onclick="openSetup()">
+        Setup guide →
+      </button>
+    </div>
+    <div class="download-meta">
+      v1.0.0 · Issues? Contact 077 361 8272
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── FOOTER ──────────────── -->
+<footer>
+  <div class="footer-inner">
+    <span>© 2026 STUDYOPS · All rights reserved</span>
+    <span>Built in South Africa</span>
+  </div>
+</footer>
+
+<!-- ──────────────── SETUP MODAL ──────────────── -->
+<div class="modal-overlay" id="setup-modal" onclick="overlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Setup Guide</div>
+        <div class="modal-sub">Download · Install · Trial · Upgrade</div>
+      </div>
+      <button class="modal-close" onclick="closeSetup()" aria-label="Close">✕</button>
+    </div>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchTab('download', this)">⬇ Download</button>
+      <button class="modal-tab" onclick="switchTab('install', this)">🪟 Install</button>
+      <button class="modal-tab" onclick="switchTab('trial', this)">◐ Trial</button>
+      <button class="modal-tab" onclick="switchTab('upgrade', this)">◈ Upgrade</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- DOWNLOAD -->
+      <div class="tab-panel active" id="panel-download">
+        <p class="tab-intro">Windows will flag the installer as unrecognised. This is normal for new software. These steps get you past it.</p>
+        <div class="alert alert-warn">
+          <span>⚠</span>
+          <span><strong>Why does this happen?</strong> StudyOps is new and hasn't been registered with Microsoft SmartScreen yet. The file is safe. The steps below tell you how to bypass the warning.</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div>
+              <div class="step-title">Click Download</div>
+              <div class="step-desc">Click the <span class="hl">Download for Windows</span> button. A warning appears in your browser's download bar at the bottom of the screen — don't dismiss it yet.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div>
+              <div class="step-title">Open the three dots menu</div>
+              <div class="step-desc">Hover over the warning. Three dots <code>···</code> appear on the right. Click them to open the menu.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div>
+              <div class="step-title">Select "Keep"</div>
+              <div class="step-desc">Choose <span class="hl">Keep</span> from the dropdown. A popup opens with more options.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div>
+              <div class="step-title">Click the small arrow next to Delete</div>
+              <div class="step-desc">At the bottom of the popup, find the <code>Delete</code> button. To its right is a <span class="hl">small downward arrow</span>. Click that arrow — not the Delete button.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">05</div>
+            <div>
+              <div class="step-title">Click "Keep anyway"</div>
+              <div class="step-desc">Choose <span class="hl">Keep anyway</span>. The file finishes downloading to your machine.</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer-note">Requires Windows 10 or 11 · 64-bit</div>
+      </div>
+
+      <!-- INSTALL -->
+      <div class="tab-panel" id="panel-install">
+        <p class="tab-intro">Once the file is downloaded, run the installer and follow these five steps.</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div>
+              <div class="step-title">Open the installer</div>
+              <div class="step-desc">Open your <code>Downloads</code> folder and double-click <code>StudyOps-Setup-v1.0.0.exe</code>. The setup wizard launches.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div>
+              <div class="step-title">Click Next</div>
+              <div class="step-desc">The welcome screen appears. Click <span class="hl">Next</span> to continue.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div>
+              <div class="step-title">Check "Desktop shortcut"</div>
+              <div class="step-desc">Tick <span class="hl">Create a desktop shortcut</span> so you can launch StudyOps with one click. Then click Next.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div>
+              <div class="step-title">Choose install location</div>
+              <div class="step-desc">Leave the default folder or click <span class="hl">Browse</span> to pick a different one. Click Next.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">05</div>
+            <div>
+              <div class="step-title">Click Install</div>
+              <div class="step-desc">Press <span class="hl">Install</span>. After it completes, the StudyOps shortcut appears on your desktop. Open it and you're in.</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer-note">The app is safe · Windows warns on all new unsigned software</div>
+      </div>
+
+      <!-- TRIAL -->
+      <div class="tab-panel" id="panel-trial">
+        <p class="tab-intro">Every new account unlocks all Pro features automatically. No card required.</p>
+        <div class="alert alert-info">
+          <span>◐</span>
+          <span><strong>14-day free trial — no payment needed.</strong> When you register and log in for the first time, all Pro features unlock immediately.</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div>
+              <div class="step-title">Register an account</div>
+              <div class="step-desc">Open StudyOps and create an account with your email. Your <span class="hl">14-day Pro trial starts automatically.</span></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div>
+              <div class="step-title">Use everything</div>
+              <div class="step-desc">All features unlocked for 14 days — timer, timetable, AI study plan, full analytics, cloud sync.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div>
+              <div class="step-title">After 14 days</div>
+              <div class="step-desc">Account moves to Free mode. Some features become limited — but the app keeps working and <span class="hl">your data is never deleted.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer-note">No credit card required · Upgrade anytime</div>
+      </div>
+
+      <!-- UPGRADE -->
+      <div class="tab-panel" id="panel-upgrade">
+        <p class="tab-intro">When your trial ends, upgrade to Pro to keep all features. R49 per month.</p>
+        <div class="alert alert-warn">
+          <span>🧪</span>
+          <span><strong>Currently in test mode.</strong> The payment system is using Paystack test mode while we're in beta. You won't be charged. Card details on the checkout page are pre-filled.</span>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div>
+              <div class="step-title">Click Upgrade to Pro</div>
+              <div class="step-desc">Find this button in your <span class="hl">profile panel</span> or when you tap any locked feature.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div>
+              <div class="step-title">Review and confirm</div>
+              <div class="step-desc">Read the plan details, then click <span class="hl">Upgrade to Pro</span> at the bottom.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div>
+              <div class="step-title">Complete checkout</div>
+              <div class="step-desc">The Paystack checkout opens with card details pre-filled. <span class="hl">Don't change them</span> — this is a test card.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div>
+              <div class="step-title">Click Success</div>
+              <div class="step-desc">Select <span class="hl">Success</span> to simulate a completed payment. Your account upgrades to Pro instantly.</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer-note">R49 / month · Cancel anytime · 14-day trial included</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ──────────────── Live nav time ──────────────── */
+function updateTime() {
+  const d = new Date();
+  const h = String(d.getHours()).padStart(2, '0');
+  const m = String(d.getMinutes()).padStart(2, '0');
+  const s = String(d.getSeconds()).padStart(2, '0');
+  const el = document.getElementById('nav-time');
+  if (el) el.textContent = `${h}:${m}:${s}`;
+}
+updateTime();
+setInterval(updateTime, 1000);
+
+/* ──────────────── Mobile menu ──────────────── */
+document.getElementById('mobile-toggle').addEventListener('click', () => {
+  document.getElementById('mobile-menu').classList.toggle('open');
+});
+document.querySelectorAll('.nav-mobile-menu a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('mobile-menu').classList.remove('open');
+  });
+});
+
+/* ──────────────── Setup modal ──────────────── */
+function openSetup() {
+  document.getElementById('setup-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSetup() {
+  document.getElementById('setup-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function overlayClick(e) {
+  if (e.target === document.getElementById('setup-modal')) closeSetup();
+}
+function switchTab(name, btn) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSetup();
+});
+</script>
+
+</body>
+</html>
